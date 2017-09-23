@@ -24,10 +24,10 @@ UKF::UKF() {
   P_ = MatrixXd(5, 5);
 
   // Process noise standard deviation longitudinal acceleration in m/s^2
-  std_a_ = 2;
+  std_a_ = 1;
 
   // Process noise standard deviation yaw acceleration in rad/s^2
-  std_yawdd_ = 2;
+  std_yawdd_ = 1;
 
   // Laser measurement noise standard deviation position1 in m
   std_laspx_ = 0.15;
@@ -200,10 +200,10 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
 	// identity 4 matrix
 	MatrixXd I = MatrixXd::Identity(5, 5);
 	MatrixXd H = MatrixXd(2, 5);
+	  H << 1, 0, 0, 0, 0,
+				  0, 1, 0, 0, 0;
 	Hx = H*x_;
 	z = meas_package.raw_measurements_;
-	  H << 1, 0, 0, 0, 0,
-			  0, 1, 0, 0, 0;
 
 	  R = MatrixXd(2, 2);
 	   R << 0.022, 0,
@@ -342,7 +342,6 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
  * @param {Xsig_out} generated sigma point output.
  */
 void UKF::GenerateSigmaPoints(MatrixXd* Xsig_out) {
-	std::cout<<"generate Sigma points"<<endl;
 	//create sigma point matrix
 	MatrixXd Xsig = MatrixXd(n_x_, 2 * n_x_ + 1);
 
@@ -364,7 +363,6 @@ void UKF::GenerateSigmaPoints(MatrixXd* Xsig_out) {
 
 void UKF::AugmentedSigmaPoints(MatrixXd* Xsig_out) {
 
-	std::cout<<"Aug Sigma points estimation"<<endl;
 	//create augmented mean vector
 	VectorXd x_aug = VectorXd(7);
 
@@ -394,8 +392,6 @@ void UKF::AugmentedSigmaPoints(MatrixXd* Xsig_out) {
 		Xsig_aug.col(i + 1) = x_aug + sqrt(lambda_ + n_aug_) * L.col(i);
 		Xsig_aug.col(i + 1 + n_aug_) = x_aug - sqrt(lambda_ + n_aug_) * L.col(i);
 	}
-
-	std::cout<<"P = "<<P_<<endl;
 
 	//write result
 	*Xsig_out = Xsig_aug;
